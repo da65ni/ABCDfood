@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Die Lieblingslokale der Familie ABCD rund um Dachau.">
+<title>ABCD Favourite Food Spots</title>
+<style>
+/* Layout: Kopf mit den vier ABCD-Kacheln, darunter Hero (Frage, Wuerfel-Knopf, gelber Bon),
+   dann einklappbare Filter, Werkzeugleiste und Kartenraster mit Namenskacheln in Familienfarben. */
+:root{
+  color-scheme:light;
+  --bg:#F3F4FA;
+  --surface:#FFFFFF;
+  --surface-2:#E8EAF6;
+  --ink:#161A3A;
+  --ink-2:#53587A;
+  --line:#D6D9EC;
+  --a:#E5432B;  --on-a:#FFFFFF;
+  --b:#FFC83D;  --on-b:#2A2200;
+  --c:#1E9460;  --on-c:#FFFFFF;
+  --d:#3552E8;  --on-d:#FFFFFF;
+  --accent:#D0381F;
+  --accent-ink:#FFFFFF;
+  --good:#17754A;
+  --good-bg:#DDF2E8;
+  --sun:#FFC83D;
+  --sun-ink:#2A2200;
+  --focus:#2F6FED;
+  --font-display:'Avenir Next','Segoe UI Variable Display','Trebuchet MS',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-body:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+  --font-mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme:dark;
+    --bg:#0F1226;
+    --surface:#181C38;
+    --surface-2:#232848;
+    --ink:#EEF0FF;
+    --ink-2:#A9AFD6;
+    --line:#2D3358;
+    --accent:#FF6B52;
+    --accent-ink:#1E0A05;
+    --good:#5FD1A0;
+    --good-bg:#163A2B;
+    --focus:#8DB4FF;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1120px;margin-inline:auto;padding-inline:16px;padding-top:calc(20px + env(safe-area-inset-top,0px));padding-bottom:calc(56px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:28px}
+
+/* Kopf mit ABCD */
+.mast{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.mark{display:flex;gap:6px}
+.t{display:grid;place-items:center;font-family:var(--font-display);font-weight:800;border-radius:12px;line-height:1}
+.t-a{background:var(--a);color:var(--on-a)}
+.t-b{background:var(--b);color:var(--on-b)}
+.t-c{background:var(--c);color:var(--on-c)}
+.t-d{background:var(--d);color:var(--on-d)}
+.mark .t{width:46px;height:46px;font-size:1.7rem}
+.mark .t:nth-child(1){transform:rotate(-5deg)}
+.mark .t:nth-child(2){transform:rotate(3deg) translateY(2px)}
+.mark .t:nth-child(3){transform:rotate(-3deg)}
+.mark .t:nth-child(4){transform:rotate(5deg) translateY(2px)}
+.mast-text{min-width:0}
+.mast-title{margin:0;font-family:var(--font-display);font-weight:700;font-size:1.25rem;letter-spacing:-.01em}
+.eyebrow{margin:2px 0 0;font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;padding:.65rem 1.1rem;border-radius:12px;border:1px solid transparent;font-weight:600;cursor:pointer;background:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:not(:disabled):hover{filter:brightness(1.07)}
+.btn-ghost{border-color:var(--line);background:var(--surface)}
+.btn-ghost:not(:disabled):hover{border-color:var(--ink-2)}
+.btn-big{font-family:var(--font-display);font-size:1.4rem;font-weight:700;padding:1rem 1.7rem;border-radius:16px;min-height:62px}
+.btn-link{background:none;border:0;padding:0;min-height:0;text-decoration:underline;cursor:pointer;font-weight:500}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:center}
+.hero-left{display:flex;flex-direction:column;gap:14px;align-items:flex-start;min-width:0}
+h1{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(2.6rem,9vw,5rem);line-height:.96;letter-spacing:-.03em;text-wrap:balance}
+.lede{margin:0;max-width:34ch;color:var(--ink-2);font-size:1.08rem}
+.pick-info,.veto-info{margin:0;font-size:.92rem;color:var(--ink-2)}
+.hero-right{min-width:0}
+@media (min-width:860px){.hero{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:48px}}
+
+/* Kassenbon */
+.bon{background:var(--sun);color:var(--sun-ink);font-family:var(--font-mono);font-size:.95rem;padding:20px 22px 24px;border-radius:8px;display:flex;flex-direction:column;gap:12px;animation:bonin .35s ease-out}
+@keyframes bonin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.bon{animation:none}.toast{transition:none}}
+.bon-head{display:flex;justify-content:space-between;gap:12px;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;flex-wrap:wrap}
+.perf{border:0;border-top:2px dashed currentColor;opacity:.5;margin:0}
+.bon-name{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(1.9rem,5vw,2.6rem);line-height:1.02;letter-spacing:-.02em;overflow-wrap:anywhere;text-wrap:balance}
+.bon-sub{margin:0;opacity:.85}
+.bon-link{align-self:flex-start;color:inherit;font-weight:500;text-underline-offset:3px}
+.bon-rows{margin:0;display:flex;flex-direction:column;gap:6px}
+.bon-rows .r{display:flex;align-items:baseline;gap:8px}
+.bon-rows dt{order:0}
+.bon-rows .r::before{content:"";order:1;flex:1;border-bottom:1px dotted currentColor;opacity:.55;transform:translateY(-3px)}
+.bon-rows dd{order:2;margin:0;text-align:right;font-weight:500}
+.bon-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.bon .btn-ghost{background:transparent;border-color:var(--sun-ink);color:var(--sun-ink)}
+.bon .btn-primary{background:var(--accent);color:var(--accent-ink)}
+.bon-final{margin:0;font-family:var(--font-display);font-weight:700;font-size:1.25rem}
+.bon--empty{background:transparent;color:var(--ink-2);border:2px dashed var(--line);animation:none;min-height:190px;justify-content:center}
+.bon--empty p{margin:0;max-width:34ch}
+
+/* Filter */
+.filters{border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.filters>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:.8rem 1rem;font-weight:600;min-height:48px}
+.filters>summary::-webkit-details-marker{display:none}
+.filters>summary::after{content:"";margin-left:auto;width:.6rem;height:.6rem;border-right:2px solid var(--ink-2);border-bottom:2px solid var(--ink-2);transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+.filters[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
+.badge{background:var(--accent);color:var(--accent-ink);font-size:.78rem;font-weight:700;border-radius:999px;padding:.05rem .5rem;min-width:1.4rem;text-align:center}
+#fbody{display:flex;flex-direction:column;gap:14px;padding:16px;border-top:1px solid var(--line)}
+.fgroup{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+@media (min-width:700px){.fgroup{grid-template-columns:8rem minmax(0,1fr);gap:12px}}
+.flabel{font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);padding-top:.5rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.chip{min-height:38px;padding:.35rem .8rem;border:1px solid var(--line);border-radius:999px;background:var(--surface);cursor:pointer;font-size:.9rem}
+.chip:hover{border-color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.freset{align-self:flex-start}
+
+/* Werkzeugleiste + Liste */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.in{width:100%;min-height:44px;padding:.55rem .75rem;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.toolbar .search{flex:1 1 220px;min-width:0}
+.toolbar .sort{flex:0 1 220px;min-width:0}
+.count{margin:0;font-size:.92rem;color:var(--ink-2)}
+.list-head{display:flex;flex-direction:column;gap:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px;margin:0;padding:0;list-style:none}
+.grid>li{min-width:0}
+.card{display:flex;flex-direction:column;gap:10px;height:100%;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.card-head{display:flex;gap:12px;align-items:center;min-width:0}
+.tile{flex:0 0 auto;width:52px;height:52px;font-size:1.7rem;border-radius:14px}
+.card-title{min-width:0;display:flex;flex-direction:column;gap:2px}
+.kicker{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.card h3{margin:0;font-family:var(--font-display);font-weight:700;font-size:1.35rem;line-height:1.08;letter-spacing:-.01em;overflow-wrap:anywhere}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:.72rem;font-weight:600;padding:.1rem .55rem;border-radius:999px;background:var(--surface-2);color:var(--ink-2)}
+.pill-new{background:var(--good-bg);color:var(--good)}
+.card-place{margin:0;color:var(--ink-2);font-size:.92rem}
+.meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.92rem;font-variant-numeric:tabular-nums}
+.eur b{font-weight:700}
+.eur i{font-style:normal;opacity:.3}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:.78rem;padding:.12rem .55rem;border:1px solid var(--line);border-radius:6px;color:var(--ink-2)}
+.card-note{margin:0;font-size:.88rem;color:var(--ink-2)}
+.card-link{align-self:flex-start;display:inline-flex;align-items:center;min-height:36px;padding:.25rem .8rem;border:1px solid var(--line);border-radius:999px;font-weight:600;font-size:.88rem;color:var(--ink);text-decoration:none;background:var(--surface)}
+.card-link:hover{border-color:var(--ink);background:var(--surface-2)}
+.card-last{margin:auto 0 0;padding-top:4px;font-size:.85rem;color:var(--ink-2)}
+.empty{border:2px dashed var(--line);border-radius:16px;padding:32px 20px;text-align:center;color:var(--ink-2);display:flex;flex-direction:column;gap:12px;align-items:center}
+.empty p{margin:0;max-width:44ch}
+.empty h2{margin:0;font-family:var(--font-display);font-size:1.4rem;color:var(--ink)}
+.foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:var(--ink-2);font-size:.88rem;border-top:1px solid var(--line);padding-top:18px}
+.foot .mark .t{width:26px;height:26px;font-size:.95rem;border-radius:7px}
+.note{margin:0;border:1px solid var(--line);background:var(--surface-2);padding:.65rem .9rem;border-radius:10px;color:var(--ink-2);font-size:.92rem}
+
+/* Kopier-Fenster */
+.sheet{position:fixed;inset:0;z-index:50;display:flex;justify-content:flex-end}
+.sheet-bg{position:absolute;inset:0;background:rgb(8 10 28 / .6)}
+.sheet-panel{position:relative;width:min(560px,100%);height:100%;background:var(--surface);color:var(--ink);overflow-y:auto;display:flex;flex-direction:column;box-shadow:-8px 0 30px rgb(0 0 0 / .25)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(16px + env(safe-area-inset-top,0px)) 20px 12px}
+.sheet-head h2{margin:0;font-family:var(--font-display);font-size:1.5rem;letter-spacing:-.01em}
+.copybox{padding:8px 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.copybox textarea{min-height:260px;font-family:var(--font-mono);font-size:.88rem;resize:vertical}
+
+/* Hinweis unten */
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:70;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--ink);color:var(--bg);padding:.7rem 1.1rem;border-radius:12px;font-weight:500;max-width:min(92vw,460px);text-align:center;transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div class="mark" aria-hidden="true"><span class="t t-a">A</span><span class="t t-b">B</span><span class="t t-c">C</span><span class="t t-d">D</span></div>
+    <div class="mast-text">
+      <p class="mast-title">ABCD Favourite Food Spots</p>
+      <p class="eyebrow" id="eyebrow">Rund um Dachau</p>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="h1">
+    <div class="hero-left">
+      <h1 id="h1">Wo essen wir?</h1>
+      <p class="lede">Filtert nach Laune und lasst die Liste entscheiden. Wer nicht einverstanden ist, legt Veto ein.</p>
+      <button type="button" class="btn btn-primary btn-big" id="rollBtn" data-act="roll">Such für uns aus</button>
+      <p class="pick-info" id="pickInfo"></p>
+      <p class="veto-info" id="vetoInfo" hidden></p>
+    </div>
+    <div class="hero-right">
+      <div id="bon" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <noscript><p class="note">Diese Seite braucht JavaScript, um die Liste anzuzeigen.</p></noscript>
+
+  <details class="filters" id="fdetails">
+    <summary><span>Filter</span><span class="badge" id="fbadge" hidden></span></summary>
+    <div id="fbody"></div>
+  </details>
+
+  <section class="list-head" aria-label="Alle Lokale">
+    <div class="toolbar">
+      <input class="in search" id="q" type="search" placeholder="Suchen: Name, Ort, Küche" aria-label="Lokale durchsuchen" autocomplete="off">
+      <select class="in sort" id="sort" aria-label="Sortierung">
+        <option value="fav">Favoriten zuerst</option>
+        <option value="az">Name A bis Z</option>
+      </select>
+      <button type="button" class="btn btn-ghost" id="copyBtn">Liste kopieren</button>
+    </div>
+    <p class="count" id="count"></p>
+    <ul class="grid" id="list"></ul>
+    <div id="empty"></div>
+  </section>
+
+  <footer class="foot">
+    <div class="mark" aria-hidden="true"><span class="t t-a">A</span><span class="t t-b">B</span><span class="t t-c">C</span><span class="t t-d">D</span></div>
+    <span>Unsere Lieblingslokale. Stand der Liste: 13.10.2026.</span>
+  </footer>
+</div>
+
+<div id="sheet" class="sheet" hidden></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Daten (wird bei jeder Aktualisierung ersetzt) ---------- */
+var DATA=[
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791922701000,
+  "entfernung": "",
+  "kueche": "Bayerisch",
+  "name": "Schwarzberghof",
+  "notiz": "Ruhetage Montag und Dienstag.",
+  "ort": "Augsburger Str. 105, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [],
+  "website": "https://www.schwarzberghof.eu/",
+  "zuletzt": "",
+  "id": "schwarzberghof"
+ },
+ {
+  "anlass": [],
+  "bewertung": 5,
+  "created": 1791922702000,
+  "entfernung": "",
+  "kueche": "Asiatisch",
+  "name": "HD",
+  "notiz": "Mit Sushi. Ruhetag Dienstag. Der Link führt zur Bestellseite (Lieferando).",
+  "ort": "Wallbergstr. 2, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [
+   "Vegetarisch/vegan",
+   "Lieferung/Abholung"
+  ],
+  "website": "https://hdrestaurant-dachau.de/",
+  "zuletzt": "",
+  "id": "hd-asiatisch"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791922703000,
+  "entfernung": "",
+  "kueche": "Italienisch",
+  "name": "Trattoria Piccante",
+  "notiz": "Ruhetag Montag. Große Terrasse. Samstags Pizzatag.",
+  "ort": "Sparkassenplatz 5, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [
+   "Außenplatz"
+  ],
+  "website": "https://trattoria-piccante.de/",
+  "zuletzt": "",
+  "id": "piccante"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791922704000,
+  "entfernung": "",
+  "kueche": "Mexikanisch",
+  "name": "La Bodega",
+  "notiz": "Ruhetag Montag. Biergarten an der Amper, Spielplatz für Kinder.",
+  "ort": "Roßwachtstr. 31, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [
+   "Außenplatz",
+   "Kinderfreundlich",
+   "Lieferung/Abholung"
+  ],
+  "website": "https://labodega-dachau.de/",
+  "zuletzt": "",
+  "id": "la-bodega"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791922705000,
+  "entfernung": "",
+  "kueche": "Asiatisch",
+  "name": "Geisha",
+  "notiz": "Mit Sushi.",
+  "ort": "Klagenfurterplatz 1, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [
+   "Reservierung nötig"
+  ],
+  "website": "https://www.geisha-dachau.de/",
+  "zuletzt": "",
+  "id": "geisha"
+ },
+ {
+  "anlass": [],
+  "bewertung": 4,
+  "created": 1791922706000,
+  "entfernung": "",
+  "kueche": "Griechisch",
+  "name": "Bakalikon",
+  "notiz": "Ruhetag Montag. Reservierung über die Website möglich.",
+  "ort": "Augsburger Str. 12, Dachau",
+  "preis": 3,
+  "status": "bekannt",
+  "tags": [],
+  "website": "https://bakalikon.de/",
+  "zuletzt": "",
+  "id": "bakalikon"
+ },
+ {
+  "anlass": [],
+  "bewertung": 4,
+  "created": 1791922707000,
+  "entfernung": "",
+  "kueche": "Indisch",
+  "name": "Mantra",
+  "notiz": "Ruhetag Dienstag. Auch glutenfreie Gerichte.\nPapa will nächstes Mal Butter Chicken probieren!",
+  "ort": "Mittermayerstr. 15, Dachau",
+  "preis": 2,
+  "status": "bekannt",
+  "tags": [
+   "Vegetarisch/vegan"
+  ],
+  "website": "https://dachaumantra.de/",
+  "zuletzt": "",
+  "id": "mantra"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791922708000,
+  "entfernung": "",
+  "kueche": "Italienisch",
+  "name": "L'Aperitivo Mizzica",
+  "notiz": "",
+  "ort": "Augsburger Str. 39, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [],
+  "website": "https://laperitivo-mizzica.jimdosite.com/",
+  "zuletzt": "",
+  "id": "mizzica"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791922709000,
+  "entfernung": "",
+  "kueche": "Burger & Co.",
+  "name": "TaRa Tagesbar",
+  "notiz": "Ruhetag Montag. Smash Burger und Bowls, am Wochenende ab morgens geöffnet.",
+  "ort": "Schillerstr. 33, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [],
+  "website": "https://www.tara-tagesbar.de/",
+  "zuletzt": "",
+  "id": "tara"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791922710000,
+  "entfernung": "",
+  "kueche": "Bayerisch",
+  "name": "Hotel Fischer",
+  "notiz": "Tafernwirtschaft, täglich geöffnet, warme Küche 11 bis 22 Uhr.",
+  "ort": "Bahnhofstr. 4, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [],
+  "website": "https://www.hotelzumfischer.de/en/",
+  "zuletzt": "",
+  "id": "hotel-fischer"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791922711000,
+  "entfernung": "",
+  "kueche": "Bayerisch",
+  "name": "Drei Rosen",
+  "notiz": "Täglich geöffnet. Großer Biergarten unter Kastanien.",
+  "ort": "Münchner Str. 5, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [
+   "Außenplatz",
+   "Lieferung/Abholung"
+  ],
+  "website": "https://www.gasthaus-3rosen.de/",
+  "zuletzt": "",
+  "id": "drei-rosen"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791922712000,
+  "entfernung": "",
+  "kueche": "Pizza",
+  "name": "Pizzeria am Himmelreich",
+  "notiz": "Ruhetag Dienstag. Der Link führt zur Bestellseite (Lieferando).",
+  "ort": "Himmelreichweg 11, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [
+   "Lieferung/Abholung"
+  ],
+  "website": "https://www.pizzaamhimmelreich-dachau.de/",
+  "zuletzt": "",
+  "id": "pizza-himmelreich"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791922713000,
+  "entfernung": "",
+  "kueche": "Griechisch",
+  "name": "Annas Taverne",
+  "notiz": "",
+  "ort": "Jakob-Schmid-Str. 44, Dachau",
+  "preis": 0,
+  "status": "bekannt",
+  "tags": [],
+  "website": "",
+  "zuletzt": "",
+  "id": "annas-taverne"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791923801000,
+  "entfernung": "",
+  "kueche": "Deutsch",
+  "name": "Alte Liebe an der Amper",
+  "notiz": "Täglich geöffnet. Biergarten direkt an der Amper.",
+  "ort": "Im Lus 4, Dachau",
+  "preis": 0,
+  "status": "neu",
+  "tags": [
+   "Außenplatz"
+  ],
+  "website": "https://alteliebe-dachau.de/",
+  "zuletzt": "",
+  "id": "alte-liebe"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791923802000,
+  "entfernung": "",
+  "kueche": "Italienisch",
+  "name": "Antica Osteria",
+  "notiz": "Ruhetag Dienstag. Italienisch-mediterran mit Pasta, Pizza und Fisch.",
+  "ort": "Sudetenlandstr. 2, Dachau",
+  "preis": 0,
+  "status": "neu",
+  "tags": [],
+  "website": "https://www.antica-dah.de/",
+  "zuletzt": "",
+  "id": "antica-osteria"
+ },
+ {
+  "anlass": [],
+  "bewertung": 0,
+  "created": 1791923803000,
+  "entfernung": "",
+  "kueche": "Asiatisch",
+  "name": "Koto",
+  "notiz": "Chinesisch und Sushi.",
+  "ort": "Fraunhoferstr. 1, Dachau",
+  "preis": 0,
+  "status": "neu",
+  "tags": [],
+  "website": "",
+  "zuletzt": "",
+  "id": "koto"
+ }
+];
+
+/* ---------- Konstanten ---------- */
+var ANLAESSE=['Schnell & unkompliziert','Gemütlich','Besonderer Anlass'];
+var TAGS=['Kinderfreundlich','Reservierung nötig','Außenplatz','Vegetarisch/vegan','Lieferung/Abholung'];
+var ENTF={fuss:'Zu Fuß',nah:'Bis 15 Min.',weit:'Ausflug'};
+var STATUS={bekannt:'Schon dort gewesen',neu:'Noch nicht probiert'};
+
+/* ---------- Zustand ---------- */
+var state={
+  items:DATA.slice(),
+  q:'',sort:'fav',
+  f:{kueche:new Set(),anlass:new Set(),preis:new Set(),entf:new Set(),tags:new Set(),status:new Set()},
+  vetoed:new Set(),pickId:null,decided:false,rolling:false
+};
+var lastFocus=null;
+
+/* ---------- Helfer ---------- */
+function $(s,r){return (r||document).querySelector(s);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function safeUrl(u){u=String(u||'').trim();return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:'';}
+function eurHTML(p){
+  p=Number(p)||0;if(!p)return '';
+  return '<span class="eur" role="img" aria-label="Preis '+p+' von 3"><b>'+'€'.repeat(p)+'</b><i>'+'€'.repeat(3-p)+'</i></span>';
+}
+function tileClass(k){
+  var s=String(k||''),h=0;
+  for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;
+  return 't-'+['a','b','c','d'][h%4];
+}
+var toastTimer=null;
+function toast(msg){
+  var t=$('#toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},3400);
+}
+function lastText(it){
+  if(it.status==='neu')return 'Noch nicht probiert';
+  return 'Schon dort gewesen';
+}
+
+/* ---------- Filtern, Sortieren, Auswaehlen ---------- */
+function passes(it){
+  var f=state.f;
+  if(f.kueche.size&&!f.kueche.has(it.kueche))return false;
+  if(f.anlass.size&&!(it.anlass||[]).some(function(a){return f.anlass.has(a);}))return false;
+  if(f.preis.size&&!f.preis.has(String(it.preis)))return false;
+  if(f.entf.size&&!f.entf.has(it.entfernung))return false;
+  if(f.status.size&&!f.status.has(it.status))return false;
+  var ok=true;
+  f.tags.forEach(function(t){if(!(it.tags||[]).includes(t))ok=false;});
+  if(!ok)return false;
+  if(state.q){
+    var hay=[it.name,it.ort,it.kueche,it.notiz].join(' ').toLowerCase();
+    if(hay.indexOf(state.q.toLowerCase())<0)return false;
+  }
+  return true;
+}
+function filtered(){
+  var arr=state.items.filter(passes);
+  var cmp=function(a,b){return String(a.name).localeCompare(String(b.name),'de');};
+  if(state.sort==='az')arr.sort(cmp);
+  else arr.sort(function(a,b){return (b.bewertung||0)-(a.bewertung||0)||cmp(a,b);});
+  return arr;
+}
+function poolItems(){return filtered().filter(function(i){return !state.vetoed.has(i.id);});}
+function pickItem(){return state.items.find(function(i){return i.id===state.pickId;})||null;}
+function weighted(pool){
+  var ws=pool.map(function(it){return it.bewertung>0?it.bewertung:3;});
+  var r=Math.random()*ws.reduce(function(a,b){return a+b;},0);
+  for(var i=0;i<pool.length;i++){r-=ws[i];if(r<=0)return pool[i];}
+  return pool[pool.length-1];
+}
+function activeCount(){var f=state.f,n=0;Object.keys(f).forEach(function(k){n+=f[k].size;});return n;}
+
+/* ---------- Rendering ---------- */
+function renderAll(){renderHeader();renderHero();renderFilters();renderList();}
+
+function renderHeader(){
+  var n=state.items.length;
+  $('#eyebrow').textContent='Rund um Dachau · '+n+(n===1?' Lokal':' Lokale');
+}
+
+function renderHero(){
+  var total=state.items.length,matching=filtered().length,pool=poolItems(),it=pickItem();
+  var btn=$('#rollBtn');
+  btn.textContent=(it||state.decided)?'Nochmal würfeln':'Such für uns aus';
+  btn.disabled=pool.length===0||state.rolling;
+  var info;
+  if(!total)info='Noch keine Lokale eingetragen.';
+  else if(!matching)info='Zu euren Filtern passt kein Lokal.';
+  else info=matching+(matching===1?' passendes Lokal':' passende Lokale')+' im Topf';
+  $('#pickInfo').textContent=info;
+  var v=$('#vetoInfo');
+  if(state.vetoed.size){
+    v.hidden=false;
+    v.innerHTML=state.vetoed.size+(state.vetoed.size===1?' Veto':' Vetos')+' eingelegt · <button type="button" class="btn-link" data-act="resetveto">Zurücksetzen</button>';
+  }else v.hidden=true;
+  renderBon();
+}
+
+function dateLabel(){return new Date().toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'2-digit'});}
+
+function renderBon(){
+  var el=$('#bon'),it=pickItem();
+  var head='<div class="bon-head"><span>ABCD · Vorschlag</span><span>'+esc(dateLabel())+'</span></div><hr class="perf">';
+  if(state.rolling){
+    el.innerHTML='<div class="bon">'+head+'<p class="bon-name" id="bonName">…</p><p class="bon-sub">Die Liste überlegt</p></div>';
+    return;
+  }
+  if(!it){
+    var msg='Euer Vorschlag erscheint hier. Drückt auf „Such für uns aus“.';
+    if(!state.items.length)msg='Noch keine Lokale eingetragen.';
+    else if(!filtered().length)msg='Zu den Filtern passt gerade kein Lokal. Lockert einen Filter.';
+    else if(!poolItems().length)msg='Alle Vorschläge sind per Veto abgelehnt. Setzt die Vetos zurück.';
+    el.innerHTML='<div class="bon bon--empty"><p>'+esc(msg)+'</p></div>';
+    return;
+  }
+  var rows='<div class="r"><dt>Preis</dt><dd>'+esc('€'.repeat(it.preis||0)||'offen')+'</dd></div>'
+    +'<div class="r"><dt>Weg</dt><dd>'+esc(ENTF[it.entfernung]||'offen')+'</dd></div>'
+    +(it.bewertung>0?'<div class="r"><dt>Bewertung</dt><dd>'+esc('★'.repeat(it.bewertung))+'</dd></div>':'')
+    +'<div class="r"><dt>Status</dt><dd>'+esc(STATUS[it.status]||'offen')+'</dd></div>';
+  var actions=state.decided
+    ?'<p class="bon-final">Guten Appetit!</p>'
+    :'<div class="bon-actions"><button type="button" class="btn btn-primary" data-act="go">Hier gehen wir hin</button><button type="button" class="btn btn-ghost" data-act="veto">Veto</button></div>';
+  var site=safeUrl(it.website);
+  el.innerHTML='<div class="bon">'+head
+    +'<p class="bon-name">'+esc(it.name)+'</p>'
+    +'<p class="bon-sub">'+esc([it.kueche,it.ort].filter(Boolean).join(' · '))+'</p>'
+    +(site?'<a class="bon-link" href="'+esc(site)+'" target="_blank" rel="noopener noreferrer">Zur Website</a>':'')
+    +'<hr class="perf"><dl class="bon-rows">'+rows+'</dl><hr class="perf">'+actions+'</div>';
+}
+
+function keepFocus(fn){
+  var a=document.activeElement,key=a&&a.dataset?a.dataset.k:null;
+  fn();
+  if(key){var el=document.querySelector('[data-k="'+(window.CSS&&CSS.escape?CSS.escape(key):key)+'"]');if(el)el.focus({preventScroll:true});}
+}
+
+function renderFilters(){
+  var kue=Array.from(new Set(state.items.map(function(i){return i.kueche;}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,'de');});
+  var groups=[
+    {key:'kueche',label:'Küche',opts:kue.map(function(k){return [k,k];})},
+    {key:'anlass',label:'Anlass',opts:ANLAESSE.map(function(a){return [a,a];})},
+    {key:'preis',label:'Preis',opts:[['1','€'],['2','€€'],['3','€€€']]},
+    {key:'entf',label:'Entfernung',opts:Object.keys(ENTF).map(function(k){return [k,ENTF[k]];})},
+    {key:'tags',label:'Besonderheiten',opts:TAGS.map(function(t){return [t,t];})},
+    {key:'status',label:'Status',opts:Object.keys(STATUS).map(function(k){return [k,STATUS[k]];})}
+  ].filter(function(g){return g.opts.length;});
+  var html=groups.map(function(g){
+    return '<div class="fgroup"><div class="flabel">'+esc(g.label)+'</div><div class="chips">'
+      +g.opts.map(function(o){
+        var on=state.f[g.key].has(String(o[0]));
+        return '<button type="button" class="chip" data-g="'+g.key+'" data-v="'+esc(o[0])+'" data-k="'+g.key+'|'+esc(o[0])+'" aria-pressed="'+on+'">'+esc(o[1])+'</button>';
+      }).join('')+'</div></div>';
+  }).join('');
+  var n=activeCount();
+  if(n)html+='<button type="button" class="btn btn-ghost freset" data-reset="1">Filter zurücksetzen</button>';
+  $('#fbody').innerHTML=html;
+  var b=$('#fbadge');b.hidden=!n;b.textContent=n;
+}
+
+function cardHTML(it){
+  var pills='';
+  if(it.status==='neu')pills+='<span class="pill pill-new">Noch nicht probiert</span>';
+  var place=[it.ort,ENTF[it.entfernung]].filter(Boolean).join(' · ');
+  var meta=eurHTML(it.preis)+(it.bewertung>0?'<span role="img" aria-label="Bewertung '+it.bewertung+' von 5">'+esc('★'.repeat(it.bewertung))+'</span>':'');
+  var tags=(it.anlass||[]).concat(it.tags||[]).map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join('');
+  var site=safeUrl(it.website);
+  var initial=esc(String(it.name||'?').trim().charAt(0).toUpperCase()||'?');
+  return '<li><article class="card">'
+    +'<div class="card-head"><span class="t tile '+tileClass(it.kueche)+'" aria-hidden="true">'+initial+'</span>'
+    +'<div class="card-title"><span class="kicker">'+esc(it.kueche||'Küche offen')+'</span><h3>'+esc(it.name)+'</h3></div></div>'
+    +(pills?'<div class="pills">'+pills+'</div>':'')
+    +(place?'<p class="card-place">'+esc(place)+'</p>':'')
+    +(meta?'<div class="meta">'+meta+'</div>':'')
+    +(tags?'<div class="tags">'+tags+'</div>':'')
+    +(it.notiz?'<p class="card-note">'+esc(it.notiz)+'</p>':'')
+    +(site?'<a class="card-link" href="'+esc(site)+'" target="_blank" rel="noopener noreferrer">Website öffnen ↗</a>':'')
+    +'<p class="card-last">'+esc(lastText(it))+'</p>'
+    +'</article></li>';
+}
+
+function renderList(){
+  var list=$('#list'),empty=$('#empty'),count=$('#count');
+  var arr=filtered(),total=state.items.length;
+  count.textContent=total?(arr.length+' von '+total+(total===1?' Lokal':' Lokalen')):'';
+  list.innerHTML=arr.map(cardHTML).join('');
+  if(!total){
+    empty.innerHTML='<div class="empty"><h2>Die Liste ist noch leer</h2><p>Hier erscheinen die Lokale, sobald sie eingetragen sind.</p></div>';
+  }else if(!arr.length){
+    empty.innerHTML='<div class="empty"><h2>Keine Treffer</h2><p>Zu dieser Kombination aus Filtern und Suche gibt es kein Lokal.</p><button type="button" class="btn btn-ghost" data-reset="1">Filter und Suche zurücksetzen</button></div>';
+  }else empty.innerHTML='';
+}
+
+/* ---------- Wuerfeln ---------- */
+function setPick(it){state.pickId=it.id;state.decided=false;state.rolling=false;renderHero();}
+function roll(){
+  var pool=poolItems();
+  if(!pool.length)return;
+  if(pool.length>1&&state.pickId)pool=pool.filter(function(i){return i.id!==state.pickId;});
+  var chosen=weighted(pool);
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce||pool.length===1){setPick(chosen);return;}
+  state.rolling=true;state.decided=false;renderHero();
+  var n=0;
+  var timer=setInterval(function(){
+    var el=$('#bonName');
+    if(el)el.textContent=pool[Math.floor(Math.random()*pool.length)].name;
+    n++;
+    if(n>=9){clearInterval(timer);setPick(chosen);}
+  },70);
+}
+function veto(){
+  var it=pickItem();if(!it)return;
+  state.vetoed.add(it.id);state.pickId=null;
+  if(poolItems().length)roll();else renderHero();
+}
+function go(){
+  var it=pickItem();if(!it)return;
+  state.decided=true;renderHero();
+  toast('Guten Appetit bei '+it.name+'!');
+}
+function filtersChanged(){
+  state.vetoed.clear();state.pickId=null;state.decided=false;
+  keepFocus(function(){renderHero();renderFilters();renderList();});
+}
+function resetFilters(){
+  Object.keys(state.f).forEach(function(k){state.f[k].clear();});
+  state.q='';$('#q').value='';filtersChanged();
+}
+
+/* ---------- Liste kopieren ---------- */
+function listText(){
+  var arr=filtered();
+  return 'ABCD Favourite Food Spots\n\n'+arr.map(function(i){
+    var s='• '+i.name+(i.kueche?' ('+i.kueche+')':'')+(i.ort?', '+i.ort:'');
+    var u=safeUrl(i.website);
+    return u?s+'\n  '+u:s;
+  }).join('\n');
+}
+async function copyList(){
+  if(!filtered().length){toast('Es gibt nichts zu kopieren.');return;}
+  var text=listText();
+  try{await navigator.clipboard.writeText(text);toast('Liste kopiert. Jetzt im Familienchat einfügen.');}
+  catch(e){openCopySheet(text);}
+}
+function openCopySheet(text){
+  lastFocus=document.activeElement;
+  var sh=$('#sheet');
+  sh.innerHTML='<div class="sheet-bg" data-close="1"></div><div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">'
+    +'<div class="sheet-head"><h2 id="sheetTitle">Liste kopieren</h2><button type="button" class="btn btn-ghost" data-close="1">Schließen</button></div>'
+    +'<div class="copybox"><p class="note">Das automatische Kopieren hat hier nicht geklappt. Markiert den Text und kopiert ihn von Hand.</p>'
+    +'<textarea class="in" id="copyText" readonly>'+esc(text)+'</textarea></div></div>';
+  sh.hidden=false;document.documentElement.style.overflow='hidden';
+  setTimeout(function(){var t=$('#copyText');if(t){t.focus();t.select();}},30);
+}
+function closeSheet(){
+  var sh=$('#sheet');sh.hidden=true;sh.innerHTML='';
+  document.documentElement.style.overflow='';
+  if(lastFocus&&lastFocus.focus&&document.contains(lastFocus))lastFocus.focus();
+}
+
+/* ---------- Ereignisse ---------- */
+document.addEventListener('click',function(e){
+  var t=e.target;
+  var act=t.closest&&t.closest('[data-act]');
+  if(act){
+    var a=act.dataset.act;
+    if(a==='roll')roll();
+    else if(a==='veto')veto();
+    else if(a==='go')go();
+    else if(a==='resetveto'){state.vetoed.clear();renderHero();}
+    return;
+  }
+  var chipBtn=t.closest&&t.closest('button[data-g]');
+  if(chipBtn){
+    var s=state.f[chipBtn.dataset.g],v=chipBtn.dataset.v;
+    if(s.has(v))s.delete(v);else s.add(v);
+    filtersChanged();return;
+  }
+  if(t.closest&&t.closest('[data-reset]')){resetFilters();return;}
+  if(t.closest&&t.closest('[data-close]')){closeSheet();return;}
+});
+$('#copyBtn').addEventListener('click',copyList);
+$('#q').addEventListener('input',function(e){state.q=e.target.value.trim();filtersChanged();});
+$('#sort').addEventListener('change',function(e){state.sort=e.target.value;renderList();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#sheet').hidden)closeSheet();});
+try{if(window.matchMedia&&matchMedia('(min-width: 760px)').matches)$('#fdetails').open=true;}catch(e){}
+
+renderAll();
+})();
+</script>
+</body>
+</html>
